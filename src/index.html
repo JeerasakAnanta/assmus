@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Exercise Simulation</title>
+    <style>
+        body {
+            margin: 0;
+        }
+
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // สร้างฉาก กล้อง และ Renderer
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // สร้างพื้น
+        const geometry = new THREE.PlaneGeometry(500, 500);
+        const material = new THREE.MeshBasicMaterial({ color: 0Xe0ddd3, side: THREE.DoubleSide });
+        const plane = new THREE.Mesh(geometry, material);
+        plane.rotation.x = Math.PI / 2;
+        scene.add(plane);
+
+        // สร้างกล่องซ้าย
+        const leftBoxGeometry = new THREE.BoxGeometry(1, 1, 1);
+        const leftBoxMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+        const leftBox = new THREE.Mesh(leftBoxGeometry, leftBoxMaterial);
+        leftBox.position.set(-1.5, 0.5, 0);
+        scene.add(leftBox);
+
+        // สร้างกล่องขวา
+        const rightBoxGeometry = new THREE.BoxGeometry(1, 1, 1);
+        const rightBoxMaterial = new THREE.MeshBasicMaterial({ color: 0x0000ff });
+        const rightBox = new THREE.Mesh(rightBoxGeometry, rightBoxMaterial);
+        rightBox.position.set(1.5, 0.5, 0);
+        scene.add(rightBox);
+
+        // ตั้งค่ากล้อง
+        camera.position.z = 5;
+        camera.position.y = 2;
+
+        // เพิ่มแสง
+        const light = new THREE.DirectionalLight(0xffffff, 1);
+        light.position.set(5, 10, 7.5);
+        scene.add(light);
+
+        // การตั้งค่าเพื่อควบคุมการกระโดด
+        let leftBoxJumping = false;
+        let rightBoxJumping = false;
+        let leftBoxVelocity = 0;
+        let rightBoxVelocity = 0;
+        const gravity = -0.02;
+        const jumpStrength = 0.4;
+
+        // ฟังก์ชันการกระโดด
+        const jumpLeftBox = () => {
+            if (!leftBoxJumping) {
+                leftBoxJumping = true;
+                leftBoxVelocity = jumpStrength;
+            }
+        };
+
+        const jumpRightBox = () => {
+            if (!rightBoxJumping) {
+                rightBoxJumping = true;
+                rightBoxVelocity = jumpStrength;
+            }
+        };
+
+        // การฟังเหตุการณ์แป้นพิมพ์
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'ArrowLeft') {
+                jumpLeftBox();
+            } else if (event.key === 'ArrowRight') {
+                jumpRightBox();
+            }
+        });
+
+        // ฟังก์ชันการ Render
+        const animate = () => {
+            requestAnimationFrame(animate);
+
+            if (leftBoxJumping) {
+                leftBox.position.y += leftBoxVelocity;
+                leftBoxVelocity += gravity;
+                if (leftBox.position.y <= 0.5) {  // ตรวจสอบว่ากล่องสัมผัสพื้น
+                    leftBox.position.y = 0.5;
+                    leftBoxJumping = false;
+                    leftBoxVelocity = 0;
+                }
+            }
+
+            if (rightBoxJumping) {
+                rightBox.position.y += rightBoxVelocity;
+                rightBoxVelocity += gravity;
+                if (rightBox.position.y <= 0.5) {  // ตรวจสอบว่ากล่องสัมผัสพื้น
+                    rightBox.position.y = 0.5;
+                    rightBoxJumping = false;
+                    rightBoxVelocity = 0;
+                }
+            }
+
+            renderer.render(scene, camera);
+        };
+
+        animate();
+    </script>
+</body>
+
+</html>
